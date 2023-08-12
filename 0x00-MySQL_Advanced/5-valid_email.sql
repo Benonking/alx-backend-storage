@@ -1,6 +1,6 @@
 -- create trigger that resets  the atrribute "valid_email" 
 -- only if the email has been changed
-DELIMETER //;
+DELIMETER //
 CREATE TRIGGER validate_email
 BEFORE UPDATE ON users
 FOR EACH ROW
