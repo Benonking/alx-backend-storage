@@ -1,0 +1,2 @@
+-- create stored procedure AddBonus
+-- Adds new correction for a student
