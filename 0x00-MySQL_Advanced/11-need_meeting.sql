@@ -2,10 +2,10 @@
 -- and no last meeting for more than 1 month
 
 CREATE VIEW need_meeting AS 
-SELECT name from student
+SELECT name from students
 WHERE score < 80 
 AND (
-  student.last_meeting is NULL 0R student.last_meeting < DATE_ADD(
+  students.last_meeting is NULL 0R students.last_meeting < DATE_ADD(
     NOW(), INTERVAL -1 MONTH
     )
   );
