@@ -13,4 +13,4 @@ def schools_by_topic(mongo_collection, topic):
             topic: string to be searched
             mongo_collection: pymongo collection object
     '''
-    return [topic for topic in mongo_collection.find({"topic": topic})]
+    return [topic for topic in mongo_collection.find({"topics": topic})]
