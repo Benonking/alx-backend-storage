@@ -21,6 +21,22 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    '''store history of inputs and outputs for a function'''
+    key = method.__qualname__
+    inputs = key + ":inputs"
+    outputs = key + ":outputs"
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        '''wrapper func'''
+        self._redis.rpush(inputs, str(args))
+        res = method(self, *args, **kwargs)
+        self._redis.rpush(outputs, str(res))
+        return res
+    return wrapper
+
+
 class Cache:
     '''
         define class whic initialises init method with private varibale
@@ -34,6 +50,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         '''
             store data in redis with value of Arg:data
