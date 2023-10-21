@@ -1,46 +1,38 @@
 #!/usr/bin/env python3
+'''A module with tools for request caching and tracking.
 '''
-Implement get_page function: get HTML from requets and returns it
-'''
-import requests
-from typing import Callable
 import redis
+import requests
 from functools import wraps
-
-# connect to redis server
-redis_client = redis.Redis()
+from typing import Callable
 
 
-# decorator to cache result in redis
-def chached_get_page(func: Callable) -> Callable:
+redis_store = redis.Redis()
+'''The module-level Redis instance.
+'''
+
+
+def data_cacher(method: Callable) -> Callable:
+    '''Caches the output of fetched data.
     '''
-    run wrapper when get_page is called
-    '''
-    @wraps(func)
-    def wrapper(url: str) -> str:
+    @wraps(method)
+    def invoker(url) -> str:
+        '''The wrapper function for caching the output.
         '''
-        check if page is cached in Redis
-        '''
-        redis_client.incr(f"count:{url}")
-        cached_html = redis_client.get(f'result:{url}')
-
-        if cached_html:
-            # HTML contnent in cache
-            return cached_html.decode('utf-8')
-
-        # if not cached , make HTTP request
-        cached_html = func(url)
-        # cache the html content with access count and HTML contnent
-        redis_client.set(f"count:{url}", 0)
-        redis_client.setex(f'cached_html:{url}', 10, cached_html)
-        return cached_html
-    return wrapper
+        redis_store.incr(f'count:{url}')
+        result = redis_store.get(f'result:{url}')
+        if result:
+            return result.decode('utf-8')
+        result = method(url)
+        redis_store.set(f'count:{url}', 0)
+        redis_store.setex(f'result:{url}', 10, result)
+        return result
+    return invoker
 
 
-# Decorator to cache the result
-@chached_get_page
+@data_cacher
 def get_page(url: str) -> str:
-    '''
-    get HTML page from URL and return it
+    '''Returns the content of a URL after caching the request's response,
+    and tracking the request.
     '''
     return requests.get(url).text
