@@ -5,6 +5,7 @@ Implement get_page function: get HTML from requets and returns it
 import requests
 from typing import Callable
 import redis
+from functools import wraps
 
 # connect to redis server
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -15,6 +16,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
     '''
     run wrapper when get_page is called
     '''
+    @wraps(func)
     def wrapper(url: str) -> str:
         '''
         check if page is cached in Redis
@@ -27,7 +29,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         if count is None:
             count = 0
         else:
-            count = int(count)
+            count = count
         if cached_html is not None:
             # HTML contnent in cache
             return cached_html.decode('utf-8')
