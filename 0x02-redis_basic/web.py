@@ -23,7 +23,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
 
         # get or initialize coutn for the URl
         count_key = f"count:{url}"
-        count = int(redis_client.get(count_key))
+        count = int(redis_client.find(count_key))
         if count is None:
             count = 0
         else:
