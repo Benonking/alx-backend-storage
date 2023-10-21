@@ -29,11 +29,11 @@ def chached_get_page(func: Callable) -> Callable:
             return cached_html.decode('utf-8')
 
         # if not cached , make HTTP request
-        res = func(url)
+        cached_html = func(url)
         # cache the html content with access count and HTML contnent
         redis_client.set(f"count:{url}", 0)
-        redis_client.setex(f'res:{url}', 10, res)
-        return res
+        redis_client.setex(f'cached_html:{url}', 10, cached_html)
+        return cached_html
     return wrapper
 
 
