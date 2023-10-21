@@ -21,28 +21,21 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         '''
         check if page is cached in Redis
         '''
+        redis_client.incr(f"count:{url}")
         cached_html = redis_client.get(url)
-
-        #get or initialize coutn for the URl
-        count_key = f"count:{url}"
-        count = redis_client.get(count_key)
-        if count is None:
-            count = 0
-        else:
-            count = int(count)
-        if cached_html is not None:
+        
+        if cached_html:
             # HTML contnent in cache
             return cached_html.decode('utf-8')
 
         # if not cached , make HTTP request
-        res = requests.get(url)
+        res = func(url)
 
         if res.status_code == 200:
             # cache the html content with access count and HTML contnent
-            redis_client.set(url, res.text)
+            redis_client.set(f"count:{url}", 0)
             redis_client.expire(url, 10)
-            redis_client.incr(f"count:{url}")
-            return res.text
+            return res
         else:
             return f"Failed to retrieve the page"
     return wrapper
@@ -54,7 +47,7 @@ def get_page(url: str) -> str:
     '''
     get HTML page from URL and return it
     '''
-    return url
+    return requests.get(url).text
 
 
 if __name__ == "__main__":
