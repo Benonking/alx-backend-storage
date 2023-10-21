@@ -77,13 +77,20 @@ class Cache:
         return key
 
     def get(self, key, fn: Callable[[bytes], Union[str, int, float]] = None):
+        '''
+        function that calls approprite converson function on Key
+        '''
         val = self._redis.get(key)
         if val is not None and fn is not None:
             return fn(val)
         return val
 
     def get_str(self, key):
+        '''
+        convert key to string
+        '''
         return self.get(key, fn=lambda val: val.decode('utf-8'))
 
     def get_int(self, key):
+        '''covert key to int'''
         return self.get(key, fn=lambda val: int(val))
