@@ -23,13 +23,13 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         '''
         cached_html = redis_client.get(url)
 
-        # get or initialize coutn for the URl
+        #get or initialize coutn for the URl
         count_key = f"count:{url}"
-        count = int(redis_client.find(count_key))
+        count = redis_client.get(count_key)
         if count is None:
             count = 0
         else:
-            count = count
+            count = int(count)
         if cached_html is not None:
             # HTML contnent in cache
             return cached_html.decode('utf-8')
@@ -41,7 +41,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
             # cache the html content with access count and HTML contnent
             redis_client.set(url, res.text)
             redis_client.expire(url, 10)
-            redis_client.incr(count_key)
+            redis_client.incr(f"count:{url}")
             return res.text
         else:
             return f"Failed to retrieve the page"
