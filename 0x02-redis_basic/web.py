@@ -5,15 +5,13 @@ Implement get_page function: get HTML from requets and returns it
 import requests
 from typing import Callable
 import redis
-import cachetools
-import time
 
 # connect to redis server
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 
-#decorato to cache result in redis
-def chached_get_page(func):
+# decorator to cache result in redis
+def chached_get_page(func: Callable) -> Callable:
     '''
     run wrapper when get_page is called
     '''
@@ -26,8 +24,8 @@ def chached_get_page(func):
             # increment the access count and return the cached ttml content
             redis_client.incr(f"count:{url}")
             return cached_html.decode('utf-8')
-        
-        #if not cached , make HTTP request
+
+        # if not cached , make HTTP request
         res = requests.get(url)
 
         if res.status_code == 200:
@@ -35,13 +33,14 @@ def chached_get_page(func):
             redis_client.set(url, res.text, ex=10)
             redis_client.incr(f"count:{url}")
             return res.text
-        else: 
+        else:
             return f"Failed to retrieve the page"
     return wrapper
 
+
 # Decorator to cache the result
 @chached_get_page
-def get_page(url):
+def get_page(url: str) -> str:
     '''
     get HTML page from URL and return it
     '''
@@ -49,7 +48,6 @@ def get_page(url):
 
 
 if __name__ == "__main__":
-    
+
     url = "http://slowwly.robertomurray.co.uk"
-    html = get_page(url)
-    print(f"HTML Content of {url}:\n{html}")
+    get_page(url)
