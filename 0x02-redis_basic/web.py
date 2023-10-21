@@ -20,9 +20,16 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         check if page is cached in Redis
         '''
         cached_html = redis_client.get(url)
+
+        #get or initialize coutn for the URl
+        count_key = f"count:{url}"
+        count = redis_client.get(count_key)
+        if count is None:
+            count = 0
+        else:
+            count = int(count)
         if cached_html is not None:
-            # increment the access count and return the cached ttml content
-            redis_client.incr(f"count:{url}")
+            # HTML contnent in cache
             return cached_html.decode('utf-8')
 
         # if not cached , make HTTP request
@@ -32,7 +39,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
             # cache the html content with access count and HTML contnent
             redis_client.set(url, res.text)
             redis_client.expire(url, 10)
-            redis_client.incr(f"count:{url}")
+            redis_client.incr(count_key)
             return res.text
         else:
             return f"Failed to retrieve the page"
