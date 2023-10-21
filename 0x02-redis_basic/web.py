@@ -12,7 +12,7 @@ redis_client = redis.Redis()
 
 
 # decorator to cache result in redis
-def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
+def chached_get_page(func: Callable) -> Callable:
     '''
     run wrapper when get_page is called
     '''
@@ -22,7 +22,7 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         check if page is cached in Redis
         '''
         redis_client.incr(f"count:{url}")
-        cached_html = redis_client.get(url)
+        cached_html = redis_client.get(f'result:{url}')
         
         if cached_html:
             # HTML contnent in cache
@@ -30,10 +30,9 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
 
         # if not cached , make HTTP request
         res = func(url)
-
         # cache the html content with access count and HTML contnent
         redis_client.set(f"count:{url}", 0)
-        redis_client.expire(url, 10)
+        redis_client.setex(f'res:{url}', 10, res)
         return res
     return wrapper
 
