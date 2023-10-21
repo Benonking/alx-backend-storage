@@ -23,7 +23,7 @@ def chached_get_page(func: Callable) -> Callable:
         '''
         redis_client.incr(f"count:{url}")
         cached_html = redis_client.get(f'result:{url}')
-        
+
         if cached_html:
             # HTML contnent in cache
             return cached_html.decode('utf-8')
@@ -44,9 +44,3 @@ def get_page(url: str) -> str:
     get HTML page from URL and return it
     '''
     return requests.get(url).text
-
-
-if __name__ == "__main__":
-
-    url = "http://slowwly.robertomurray.co.uk"
-    get_page(url)
