@@ -31,13 +31,10 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
         # if not cached , make HTTP request
         res = func(url)
 
-        if res.status_code == 200:
-            # cache the html content with access count and HTML contnent
-            redis_client.set(f"count:{url}", 0)
-            redis_client.expire(url, 10)
-            return res
-        else:
-            return f"Failed to retrieve the page"
+        # cache the html content with access count and HTML contnent
+        redis_client.set(f"count:{url}", 0)
+        redis_client.expire(url, 10)
+        return res
     return wrapper
 
 
