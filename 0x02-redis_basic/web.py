@@ -30,7 +30,8 @@ def chached_get_page(func: Callable[[str], str]) -> Callable[[str], str]:
 
         if res.status_code == 200:
             # cache the html content with access count and HTML contnent
-            redis_client.set(url, res.text, ex=10)
+            redis_client.set(url, res.text)
+            redis_client.expire(url, 10)
             redis_client.incr(f"count:{url}")
             return res.text
         else:
